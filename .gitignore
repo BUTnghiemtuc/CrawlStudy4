@@ -1,0 +1,9 @@
+.crawlStudy4/
+data/
+study4_state.json
+study4_browser_profile/
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
