@@ -22,7 +22,15 @@ WRONG_CSV = DATA_DIR / "wrong_questions.csv"
 
 def ensure_dirs():
     DATA_DIR.mkdir(exist_ok=True)
-    DETAIL_DIR.mkdir(exist_ok=True)
+    if DETAIL_DIR.exists():
+        # Xóa các file cũ trong thư mục details để tránh lẫn lộn giữa các lần chạy khác nhau
+        for file in DETAIL_DIR.glob("question_*.*"):
+            try:
+                file.unlink()
+            except Exception as e:
+                print(f"Không thể xóa file {file.name}: {e}")
+    else:
+        DETAIL_DIR.mkdir(exist_ok=True)
 
 
 def save_page(page):
@@ -143,34 +151,35 @@ def click_explanation_button(page):
     để mở phần giải thích nếu có.
     """
     try:
-        page.get_by_text("Giải thích chi tiết đáp án", exact=False).click(timeout=5000)
-        page.wait_for_timeout(1500)
+        # Giảm timeout xuống 1500ms để không bị chờ lâu ở những câu không có nút giải thích
+        page.get_by_text("Giải thích chi tiết đáp án", exact=False).click(timeout=1500)
+        page.wait_for_timeout(1000)
         print("Đã bấm nút Giải thích chi tiết đáp án.")
     except Exception:
-        print("Không tìm thấy hoặc không cần bấm nút Giải thích chi tiết đáp án.")
+        pass
 
 
-def crawl_wrong_details(page, answers):
-    wrong_answers = [item for item in answers if item["is_wrong"]]
-
-    if not wrong_answers:
-        print("Không có câu sai nào để crawl chi tiết.")
+def crawl_all_details(page, answers):
+    if not answers:
+        print("Không có câu hỏi nào để crawl chi tiết.")
         return
 
-    print(f"\nBắt đầu crawl chi tiết {len(wrong_answers)} câu sai...")
+    print(f"\nBắt đầu crawl chi tiết toàn bộ {len(answers)} câu (bao gồm cả đúng và sai)...")
 
-    for item in wrong_answers:
+    for item in answers:
         qid = item["question_id"]
         detail_url = item["detail_url"]
+        is_wrong = item["is_wrong"]
+        status = "sai" if is_wrong else "đúng"
 
         if not detail_url:
-            print(f"Bỏ qua câu {qid}: không có detail_url.")
+            print(f"Bỏ qua câu {qid} ({status}): không có detail_url.")
             continue
 
-        print(f"\nĐang mở chi tiết câu {qid}: {detail_url}")
+        print(f"\nĐang mở chi tiết câu {qid} ({status}): {detail_url}")
 
         try:
-            page.goto(detail_url, wait_until="networkidle")
+            page.goto(detail_url, wait_until="domcontentloaded")
             page.wait_for_timeout(1500)
 
             # Bấm mở phần giải thích chi tiết
@@ -189,7 +198,7 @@ def crawl_wrong_details(page, answers):
             print(f"Đã lưu TXT: {txt_path}")
 
         except Exception as e:
-            print(f"Lỗi khi crawl câu {qid}: {e}")
+            print(f"Lỗi khi crawl câu {qid} ({status}): {e}")
 
 def main():
     ensure_dirs()
@@ -211,7 +220,7 @@ def main():
         page = context.new_page()
 
         print("Đang mở trang kết quả...")
-        page.goto(result_url, wait_until="networkidle")
+        page.goto(result_url, wait_until="domcontentloaded")
         page.wait_for_timeout(3000)
 
         html, _ = save_page(page)
@@ -227,11 +236,11 @@ def main():
         save_answers_json(answers)
         save_answers_csv(answers)
 
-        crawl_wrong_details(page, answers)
+        crawl_all_details(page, answers)
 
         context.close()
 
-    print("\nHoàn tất crawl kết quả + chi tiết câu sai.")
+    print("\nHoàn tất crawl kết quả + chi tiết toàn bộ câu hỏi (đúng và sai).")
 
 
 if __name__ == "__main__":

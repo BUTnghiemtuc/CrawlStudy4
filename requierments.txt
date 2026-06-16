@@ -2,3 +2,7 @@ playwright
 pandas
 beautifulsoup4
 lxml
+openai
+python-dotenv
+pandas
+tqdm

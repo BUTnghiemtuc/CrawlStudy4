@@ -27,6 +27,8 @@ def check_project_structure():
         "scripts/extract_result.py",
         "scripts/filter_wrong.py",
         "scripts/extract_vocab.py",
+        "scripts/make_quizlet_import.py",
+        "scripts/quizlet_auto.py",
     ]
 
     missing_files = []
@@ -77,7 +79,7 @@ def merge_detail_txt_files():
 
 
 def main():
-    print("STUDY4 Mistake Crawler Pipeline")
+    print("STUDY4 Result & Detail Crawler Pipeline")
 
     check_project_structure()
     DATA_DIR.mkdir(exist_ok=True)
@@ -96,6 +98,12 @@ def main():
 
     merge_detail_txt_files()
 
+    # Tạo dữ liệu import cho Quizlet
+    run_script("scripts/make_quizlet_import.py")
+
+    # Tự động tạo học phần trên Quizlet
+    run_script("scripts/quizlet_auto.py")
+
     print("\n" + "=" * 70)
     print("Pipeline hoàn tất.")
     print("=" * 70)
@@ -109,7 +117,10 @@ def main():
     print("- data/details/question_*.txt")
     print("- data/details/question_*.html")
     print("- data/vocab_basic.csv")
-    print("- data/final.txt (Đã gộp từ details/*.txt)")
+    print("- data/final.txt (Đã gộp từ details/*.txt cho toàn bộ câu đúng và sai)")
+    print("- data/vocabulary.csv (Từ vựng được chiết xuất từ final.txt)")
+    print("- data/quizlet_import.txt (Dữ liệu import dạng Tab cho Quizlet)")
+    print("- data/flashcard_link.csv (Link học phần Quizlet đã tạo)")
 
 
 if __name__ == "__main__":

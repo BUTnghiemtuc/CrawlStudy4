@@ -1,9 +1,25 @@
+# Môi trường ảo (Virtual Environments)
 .crawlStudy4/
-data/
-study4_state.json
-study4_browser_profile/
-__pycache__/
-*.pyc
-.env
 venv/
 .venv/
+env/
+
+# Dữ liệu & Cấu hình cục bộ (Local Data & Config)
+data/
+.env
+study4_state.json
+study4_browser_profile/
+browser_profile/
+
+# Python Cache & Build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Nhật ký hệ thống & Tệp tạm (System & IDE Logs/Temp)
+.vscode/
+.idea/
+.DS_Store
+*.log

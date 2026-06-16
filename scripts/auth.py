@@ -15,7 +15,7 @@ def main():
         )
 
         page = context.new_page()
-        page.goto("https://study4.com/", wait_until="networkidle")
+        page.goto("https://study4.com/", wait_until="domcontentloaded")
 
         print("\nHãy đăng nhập STUDY4 trong cửa sổ Chrome vừa mở.")
         print("Nếu Google vẫn chặn, hãy thử đăng nhập bằng email/password STUDY4 nếu có.")
